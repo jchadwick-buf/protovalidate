@@ -22,6 +22,7 @@ jobs:
         with:
           script: |
             const tag = '${{ github.event.inputs.tag_name }}';
+            const toolsTag = `tools/${tag}`;
             const commitTag = await github.rest.git.createTag({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -30,11 +31,25 @@ jobs:
               object: context.sha,
               type: 'commit',
             });
+            const toolsCommitTag = await github.rest.git.createTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: toolsTag,
+              message: toolsTag,
+              object: context.sha,
+              type: 'commit',
+            });
             await github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: `refs/tags/${tag}`,
               sha: commitTag.data.sha,
+            });
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/${tag}`,
+              sha: toolsCommitTag.data.sha,
             });
 
   create-release-draft:
